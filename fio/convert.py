@@ -10,9 +10,9 @@ for f in files:
     with gzip.open('./rawfiles/' + f) as zfile:
 
         filename = str(uuid.uuid4()).upper()
-        filename = filename.translate(None, '-') + '.log'
+        filename = filename.translate(None, '-') + '.gz'
 
-        with open('./logfiles/' + filename, 'w') as outfile:
+        with gzip.open('./logfiles/' + filename, 'wb') as outfile:
 
             for line in zfile:
                 for src, target in replacements.iteritems():
