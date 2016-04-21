@@ -1,3 +1,5 @@
+*.conf
 *.log
 *.gz
 **/.ropeproject
+rawfiles/

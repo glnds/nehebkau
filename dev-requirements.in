@@ -1,1 +1,3 @@
-pip-tools
+neovim
+msgpack-python
+pyyaml
