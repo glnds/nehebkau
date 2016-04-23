@@ -5,10 +5,7 @@
 #    pip-compile --output-file dev-requirements.txt dev-requirements.in
 #
 
-futures==3.0.5            # via trollius
 greenlet==0.4.9           # via neovim
 msgpack-python==0.4.7
 neovim==0.1.7
 pyyaml==3.11
-six==1.10.0               # via trollius
-trollius==2.1             # via neovim
