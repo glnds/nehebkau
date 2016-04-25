@@ -2,6 +2,10 @@
 
 import json
 import yaml
+import random
+import struct
+import socket
+
 from randomdate import RandomDate
 
 def read_config():
@@ -40,7 +44,7 @@ def main():
     print(config)
 
     locations = read_edgelocations()
-    print(len(locations))
+    sizel = len(locations)
 
     movies = read_movies()
     print(len(movies))
@@ -49,7 +53,15 @@ def main():
     print(rd.random())
 
     with open('cf.log', 'w') as stream:
-        stream.write(rd.random())
+        # date and time
+        line = rd.random()
+        # x-edge-location
+        line += '\t' + locations[random.randint(0, sizel-1)]
+        # sc-bytes
+        line += '\t' + random.randint(1024, 262144000)
+        # c-ip
+        socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
+        stream.write(line)
 
 if __name__ == '__main__':
     main()
