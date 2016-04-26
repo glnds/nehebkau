@@ -83,7 +83,14 @@ def main():
             line += '\tHit'
             # x-edge-request-id
             line += '\t' + str(uuid.uuid4())
-
+            # x-host-header
+            line += '\twww.example.com'
+            # cs-protocol
+            line += '\thttps'
+            # cs-bytes
+            line += '\t' + str(random.randint(128, 1024))
+            # time-taken
+            line += str(round(random.random(), 4))
             stream.write(line + '\n')
 
 if __name__ == '__main__':
