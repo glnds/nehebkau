@@ -90,8 +90,16 @@ def main():
             # cs-bytes
             line += '\t' + str(random.randint(128, 1024))
             # time-taken
-            line += str(round(random.random(), 4))
+            line += '\t' + str(round(random.uniform(0.03, 2.0), 4))
             stream.write(line + '\n')
+            # x-forwarded-for
+            line += '\t-'
+            # ssl-protocol
+            line += '\tTLSv1.2'
+            # ssl-cipher
+            line += '\tECDHE-RSA-AES128-GCM-SHA256'
+            # x-edge-response-result-type
+            line += '\tHit'
 
 if __name__ == '__main__':
     main()
