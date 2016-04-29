@@ -6,36 +6,17 @@ import random
 import struct
 import socket
 import uuid
+from time import sleep
 
 from randomdate import RandomDate
 
-def read_config():
+def read_yaml(filename):
     """
-    Read exhuast.conf
+    Read a yaml resource file
     """
-    with open('resources/exhaust.conf', 'r') as config_file:
-        config = json.load(config_file)
-        return config
-
-def read_edgelocations():
-    """
-    Read edge locations from a resource file
-    """
-    with open('resources/edgelocations.yml', 'r') as stream:
+    with open(filename, 'r') as stream:
         try:
-            doc = yaml.load(stream)
-            return  doc["locations"]
-        except yaml.YAMLError as exc:
-            print(exc)
-
-def read_movies():
-    """
-    Read movie slugs from a resource file
-    """
-    with open('resources/movies.yml', 'r') as stream:
-        try:
-            doc = yaml.load(stream)
-            return doc["slugs"]
+            return yaml.load(stream)
         except yaml.YAMLError as exc:
             print(exc)
 
@@ -89,17 +70,30 @@ def newlogline(randomdate, locations, movies):
 
         return line
 
-def main():
+def newlogfile(config, randomdate, locations, movies):
+    filename = config['files']['location'] + str(uuid.uuid4()) + '.log'
 
-    config = read_config()
-    locations = read_edgelocations()
-    movies = read_movies()
-    randomdate = RandomDate(config['startDate'], config['endDate'])
-
-    with open('cf.log', 'w') as stream:
-        for _ in range(75000):
+    with open(filename, 'w') as stream:
+        lines = random.randint(config['content']['minLines'], config['content']['maxLines'])
+        for _ in range(lines):
             line = newlogline(randomdate, locations, movies)
             stream.write(line + '\n')
+
+def main():
+    config = read_yaml('resources/config.yml')
+    locations = read_yaml('resources/edgelocations.yml')['locations']
+    movies = read_yaml('resources/movies.yml')['slugs']
+    randomdate = RandomDate(config['content']['startDate'], config['content']['endDate'])
+
+    if config['forever']:
+        while True:
+            newlogfile(config, randomdate, locations, movies)
+            seconds = round(random.uniform(config['interval']['minSeconds'], \
+                    config['interval']['maxSeconds']), 1)
+            print('sleep for ' + str(seconds) + ' seconds')
+            sleep(seconds)
+    else:
+        newlogfile(config, randomdate, locations, movies)
 
 if __name__ == '__main__':
     main()

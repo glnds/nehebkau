@@ -1,4 +1,5 @@
 *.conf
+config.*
 *.log
 *.gz
 *.pyc
