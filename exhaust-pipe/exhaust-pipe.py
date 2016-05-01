@@ -80,6 +80,10 @@ def newlogfile(config, randomdate, locations, movies):
             stream.write(line + '\n')
 
 def main():
+
+    print(os.environ.get['AWS_ACCESS_KEY_ID'])
+    print(os.environ.get['AWS_SECRET_ACCESS_KEY'])
+
     config = read_yaml('resources/config.yml')
     locations = read_yaml('resources/edgelocations.yml')['locations']
     movies = read_yaml('resources/movies.yml')['slugs']
