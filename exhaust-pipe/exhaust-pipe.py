@@ -1,11 +1,14 @@
 #!/usr/bin/python
 
+import os
 import json
 import yaml
 import random
 import struct
 import socket
 import uuid
+import gzip
+import tinys3
 from time import sleep
 
 from randomdate import RandomDate
@@ -70,28 +73,36 @@ def newlogline(randomdate, locations, movies):
 
         return line
 
-def newlogfile(config, randomdate, locations, movies):
-    filename = config['files']['location'] + str(uuid.uuid4()) + '.log'
+def newlogfile(config, conn,  randomdate, locations, movies):
+    filename =  str(uuid.uuid4()) + '.gz'
 
-    with open(filename, 'w') as stream:
+    with gzip.open('/tmp/' + filename, 'wb') as stream:
         lines = random.randint(config['content']['minLines'], config['content']['maxLines'])
         for _ in range(lines):
-            line = newlogline(randomdate, locations, movies)
-            stream.write(line + '\n')
+            line = newlogline(randomdate, locations, movies) + '\n'
+            stream.write(line.encode())
+
+    with gzip.open('/tmp/' + filename, 'rb') as stream:
+        conn.upload(config['files']['location'] + filename, stream)
+
+    # TODO delet tmp file
 
 def main():
 
-    print(os.environ.get['AWS_ACCESS_KEY_ID'])
-    print(os.environ.get['AWS_SECRET_ACCESS_KEY'])
-
     config = read_yaml('resources/config.yml')
+
+    awskey = os.environ['EXHAUST_AWS_ACCESS_KEY_ID']
+    awssecret = os.environ['EXHAUST_AWS_SECRET_ACCESS_KEY']
+    conn = tinys3.Connection(awskey, awssecret, config['files']['bucket'] )
+    print(conn)
+
     locations = read_yaml('resources/edgelocations.yml')['locations']
     movies = read_yaml('resources/movies.yml')['slugs']
     randomdate = RandomDate(config['content']['startDate'], config['content']['endDate'])
 
     if config['forever']:
         while True:
-            newlogfile(config, randomdate, locations, movies)
+            newlogfile(config, conn, randomdate, locations, movies)
             seconds = round(random.uniform(config['interval']['minSeconds'], \
                     config['interval']['maxSeconds']), 1)
             print('sleep for ' + str(seconds) + ' seconds')
