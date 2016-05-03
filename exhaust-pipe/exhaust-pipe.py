@@ -8,7 +8,10 @@ import struct
 import socket
 import uuid
 import gzip
-import tinys3
+import boto
+import boto.s3
+import sys
+from boto.s3.key import Key
 from time import sleep
 
 from randomdate import RandomDate
@@ -82,8 +85,8 @@ def newlogfile(config, conn,  randomdate, locations, movies):
             line = newlogline(randomdate, locations, movies) + '\n'
             stream.write(line.encode())
 
-    with gzip.open('/tmp/' + filename, 'rb') as stream:
-        conn.upload(config['files']['location'] + filename, stream)
+    with open('/tmp/' + filename, 'rb') as stream:
+        conn.upload(filename, stream, 'cf.pixxis.be')
 
     # TODO delet tmp file
 
@@ -93,8 +96,7 @@ def main():
 
     awskey = os.environ['EXHAUST_AWS_ACCESS_KEY_ID']
     awssecret = os.environ['EXHAUST_AWS_SECRET_ACCESS_KEY']
-    conn = tinys3.Connection(awskey, awssecret, config['files']['bucket'] )
-    print(conn)
+    conn = tinys3.Connection()
 
     locations = read_yaml('resources/edgelocations.yml')['locations']
     movies = read_yaml('resources/movies.yml')['slugs']

@@ -1,4 +1,4 @@
 neovim
 msgpack-python
 pyyaml
-tinys3
+boto
