@@ -8,10 +8,7 @@ import struct
 import socket
 import uuid
 import gzip
-import boto
-import boto.s3
-import sys
-from boto.s3.key import Key
+import boto3
 from time import sleep
 
 from randomdate import RandomDate
@@ -76,7 +73,7 @@ def newlogline(randomdate, locations, movies):
 
         return line
 
-def newlogfile(config, conn,  randomdate, locations, movies):
+def newlogfile(config, s3_client, randomdate, locations, movies):
     filename =  str(uuid.uuid4()) + '.gz'
 
     with gzip.open('/tmp/' + filename, 'wb') as stream:
@@ -85,18 +82,20 @@ def newlogfile(config, conn,  randomdate, locations, movies):
             line = newlogline(randomdate, locations, movies) + '\n'
             stream.write(line.encode())
 
-    with open('/tmp/' + filename, 'rb') as stream:
-        conn.upload(filename, stream, 'cf.pixxis.be')
+    s3_client.upload_file('/tmp/' + filename, config['files']['bucket'], filename)
 
-    # TODO delet tmp file
+    if config['files']['storage'] == 'S3':
+        os.remove('/tmp/' + filename)
 
 def main():
 
     config = read_yaml('resources/config.yml')
 
-    awskey = os.environ['EXHAUST_AWS_ACCESS_KEY_ID']
-    awssecret = os.environ['EXHAUST_AWS_SECRET_ACCESS_KEY']
-    conn = tinys3.Connection()
+    AWS_ACCESS_KEY_ID = os.environ['EXHAUST_AWS_ACCESS_KEY_ID']
+    AWS_SECRET_ACCESS_KEY = os.environ['EXHAUST_AWS_SECRET_ACCESS_KEY']
+
+    s3_client = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, 
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY, region_name='eu-west-1')
 
     locations = read_yaml('resources/edgelocations.yml')['locations']
     movies = read_yaml('resources/movies.yml')['slugs']
@@ -110,7 +109,7 @@ def main():
             print('sleep for ' + str(seconds) + ' seconds')
             sleep(seconds)
     else:
-        newlogfile(config, randomdate, locations, movies)
+        newlogfile(config, s3_client, randomdate, locations, movies)
 
 if __name__ == '__main__':
     main()
