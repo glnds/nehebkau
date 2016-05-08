@@ -75,27 +75,31 @@ def newlogline(randomdate, locations, movies):
 
 def newlogfile(config, s3_client, randomdate, locations, movies):
     filename =  str(uuid.uuid4()) + '.gz'
+    if s3_client is None:
+        path = config['files']['location']
+    else:
+        path = '/tmp/'
 
-    with gzip.open('/tmp/' + filename, 'wb') as stream:
+    with gzip.open(path + filename, 'wb') as stream:
         lines = random.randint(config['content']['minLines'], config['content']['maxLines'])
         for _ in range(lines):
             line = newlogline(randomdate, locations, movies) + '\n'
             stream.write(line.encode())
 
-    s3_client.upload_file('/tmp/' + filename, config['files']['bucket'], filename)
-
-    if config['files']['storage'] == 'S3':
-        os.remove('/tmp/' + filename)
+    if s3_client is not None:
+        s3_client.upload_file(path + filename, config['files']['bucket'], filename)
+        os.remove(path + filename)
 
 def main():
-
     config = read_yaml('resources/config.yml')
 
-    AWS_ACCESS_KEY_ID = os.environ['EXHAUST_AWS_ACCESS_KEY_ID']
-    AWS_SECRET_ACCESS_KEY = os.environ['EXHAUST_AWS_SECRET_ACCESS_KEY']
+    s3_client = None
+    if config['files']['storage'] == 'S3':
+        AWS_ACCESS_KEY_ID = os.environ['EXHAUST_AWS_ACCESS_KEY_ID']
+        AWS_SECRET_ACCESS_KEY = os.environ['EXHAUST_AWS_SECRET_ACCESS_KEY']
 
-    s3_client = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, 
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY, region_name='eu-west-1')
+        s3_client = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY, region_name='eu-west-1')
 
     locations = read_yaml('resources/edgelocations.yml')['locations']
     movies = read_yaml('resources/movies.yml')['slugs']
@@ -103,7 +107,7 @@ def main():
 
     if config['forever']:
         while True:
-            newlogfile(config, conn, randomdate, locations, movies)
+            newlogfile(config, s3_client, randomdate, locations, movies)
             seconds = round(random.uniform(config['interval']['minSeconds'], \
                     config['interval']['maxSeconds']), 1)
             print('sleep for ' + str(seconds) + ' seconds')
