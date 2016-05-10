@@ -5,6 +5,10 @@ MAINTAINER Gert Leenders <leenders.gert@gmail.com>
 # Add a user to allow this container to run as non-root
 RUN addgroup -g 1001 exhaust && adduser -D -G exhaust -s /bin/false -u 1001 exhaust
 
+RUN mkdir /data
+RUN chown -R exhaust:exhaust /data
+VOLUME ["/data"]
+
 WORKDIR /app
 
 COPY requirements.txt ./
