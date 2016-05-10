@@ -11,10 +11,10 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY resources ./resources
-COPY exhaust-pipe.py ./
+COPY *.py ./
 
 RUN chown -R exhaust:exhaust ./
 
 USER exhaust
 
-CMD python exhaus-pipe.py
+CMD python exhaust-pipe.py
