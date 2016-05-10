@@ -100,6 +100,11 @@ def main():
 
         s3_client = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, 
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY, region_name='eu-west-1')
+    else:
+        if os.path.isdir(config['files']['location']) == False:
+            os.mkdir(config['files']['location'])
+        else:
+            print('Local path exists.')
 
     locations = read_yaml('resources/edgelocations.yml')['locations']
     movies = read_yaml('resources/movies.yml')['slugs']
