@@ -1,4 +1,4 @@
-box: python:3.5-alpine
+box: python:3.5-slim
 build:
   steps:
     # A step that executes `pip install` command.
