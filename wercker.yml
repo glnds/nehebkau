@@ -12,5 +12,12 @@ build:
         code: |
           echo "python version $(python --version) running"
           echo "pip version $(pip --version) running"
-          python exhaut-pipe/exhaust-pipe.py
-
+          # python exhaut-pipe/exhaust-pipe.py
+deploy:
+     steps:
+       - internal/docker-push:
+           username: $DOCKER_USERNAME
+           password: $DOCKER_PASSWORD
+           tag: wercker
+           repository: glnds/exhuast
+           registry: https://hub.docker.com
