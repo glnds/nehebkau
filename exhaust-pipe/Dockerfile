@@ -8,8 +8,7 @@ RUN addgroup -g 1001 exhaust && adduser -D -G exhaust -s /bin/false -u 1001 exha
 WORKDIR /app
 
 COPY requirements.txt ./
-#RUN pip install -r requirements.txt
-RUN pip install pyyaml==3.11
+RUN pip install -r requirements.txt
 
 COPY resources ./resources
 COPY exhaust-pipe.py ./
