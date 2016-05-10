@@ -1,5 +1,5 @@
-# Starting from Python 2.7 alpine image
-FROM python:2.7-alpine
+# Starting from Python 3.5 alpine image
+FROM python:3.5-alpine
 MAINTAINER Gert Leenders <leenders.gert@gmail.com>
 
 # Add a user to allow this container to run as non-root
