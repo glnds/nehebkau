@@ -1,4 +1,12 @@
-neovim
+pip-tools
+
 msgpack-python
 pyyaml
 boto3
+
+autopep8
+flake8
+mock
+pytest
+pytest-cov
+pycodestyle
